@@ -1,0 +1,52 @@
+# Workcell definition: where things are, and which hand can reach them.
+# Coordinates are in millimetres in the robot base frame:
+#   x = along the rail (left to right), y = away from the arms, z = up.
+# Objects only ever sit in stations. Claude addresses stations by id, never raw coordinates.
+
+[workcell]
+name = "robotarm-lab bench v0"
+rail_length_mm = 900
+
+[hands.left]
+home_mm = [-150, 120, 200]
+reach = [1, 2, 3]
+
+[hands.right]
+home_mm = [150, 120, 200]
+reach = [3, 4, 5]          # station 3 is shared: use it for hand-overs
+
+[[stations]]
+id = 1
+label = "intake"
+position_mm = [-360, 260, 0]
+
+[[stations]]
+id = 2
+label = "work-left"
+position_mm = [-180, 260, 0]
+
+[[stations]]
+id = 3
+label = "handover"
+position_mm = [0, 260, 0]
+
+[[stations]]
+id = 4
+label = "work-right"
+position_mm = [180, 260, 0]
+
+[[stations]]
+id = 5
+label = "outbound"
+position_mm = [360, 260, 0]
+
+# Initial contents, used by the simulated backend.
+[[objects]]
+id = "C03"
+class = "cup"
+station = 2
+
+[[objects]]
+id = "V01"
+class = "vial"
+station = 4

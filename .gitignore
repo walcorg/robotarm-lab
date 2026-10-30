@@ -1,0 +1,12 @@
+__pycache__/
+*.egg-info/
+.venv/
+.pytest_cache/
+build/
+dist/
+# LeRobot outputs
+outputs/
+wandb/
+# Inventor lock and backup files
+OldVersions/
+*.lck

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "robotarm-lab"
+version = "0.1.0"
+description = "Claude as the planner of a dual-arm workcell, via MCP"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = ["mcp>=2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+robotarm-mcp = "robotarm_lab.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

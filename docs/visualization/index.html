@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Decision Path</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+html, body { margin: 0; } *, *::before, *::after { box-sizing: border-box; }
+/* Layout: one wide telemetry canvas (server to servo, left to right), then the sequence and each layer with its real rate. Single deliberate dark look. */
+:root {
+  --bg: #0a0c10;
+  --panel: #10141a;
+  --line: #1f2731;
+  --fg: #dfe6ee;
+  --muted: #7f8c9b;
+  --cmd: #ff5a64;      /* command going down: red */
+  --cmd-soft: #ff9384;
+  --sense: #69bfff;    /* perception going up: blue */
+  --font-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+html, body { background: var(--bg); color: var(--fg); }
+body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 28px; }
+header { display: grid; gap: 10px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.eyebrow b { color: var(--cmd); font-weight: 500; }
+.eyebrow i { color: var(--sense); font-style: normal; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(40px, 7vw, 76px); line-height: .92; letter-spacing: .01em; text-transform: uppercase; margin: 0; text-wrap: balance; }
+h1 span { color: var(--cmd); }
+.lead { max-width: 66ch; color: var(--muted); margin: 0; }
+.lead strong { color: var(--fg); font-weight: 500; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.controls .label { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-right: 4px; }
+button {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em;
+  background: transparent; color: var(--fg);
+  border: 1px solid var(--line); border-radius: 3px;
+  padding: 7px 12px; cursor: pointer;
+}
+button:hover { border-color: var(--muted); }
+button[aria-pressed="true"] { border-color: var(--cmd); color: var(--cmd-soft); }
+button:focus-visible { outline: 2px solid var(--sense); outline-offset: 2px; }
+#play { min-width: 92px; }
+
+.stage { border: 1px solid var(--line); border-radius: 4px; background: var(--panel); overflow-x: auto; }
+canvas { display: block; width: 100%; min-width: 980px; aspect-ratio: 16 / 7.4; }
+.swipe { display: none; font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-top: -18px; }
+@media (max-width: 1000px) { .swipe { display: block; } }
+
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 32px; align-items: start; }
+@media (max-width: 860px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 26px; text-transform: uppercase; letter-spacing: .03em; margin: 0 0 12px; }
+
+ol.phases { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; counter-reset: ph; }
+ol.phases li {
+  counter-increment: ph;
+  display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: baseline;
+  padding: 7px 10px; border-left: 2px solid transparent; color: var(--muted);
+  transition: color .2s, border-color .2s, background .2s;
+}
+ol.phases li::before { content: counter(ph, decimal-leading-zero); font-family: var(--font-mono); font-size: 12px; }
+ol.phases li .t { font-family: var(--font-mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+ol.phases li.on { color: var(--fg); background: rgba(255, 90, 100, .07); border-left-color: var(--cmd); }
+ol.phases li.on.up { background: rgba(105, 191, 255, .07); border-left-color: var(--sense); }
+
+.layers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+@media (max-width: 520px) { .layers { grid-template-columns: minmax(0, 1fr); } }
+.layer { background: var(--bg); padding: 14px 16px; display: grid; gap: 4px; }
+.layer .rate { font-family: var(--font-mono); font-size: 13px; color: var(--cmd-soft); font-variant-numeric: tabular-nums; }
+.layer .name { font-weight: 500; }
+.layer p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.note { font-size: 13px; color: var(--muted); max-width: 80ch; border-top: 1px solid var(--line); padding-top: 14px; margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 18px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 18px; height: 2px; vertical-align: middle; margin-right: 8px; background: currentColor; }
+.legend .c { color: var(--cmd); }
+.legend .s { color: var(--sense); }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Server → network → local PC → policy → firmware → servo</div>
+    <h1>From neural network <span>to servo</span></h1>
+    <p class="lead">One decision, <strong>"move the cup to the right with the left hand"</strong>, travelling through every layer at its real speed. Red is the command going down; blue is what the sensors send back up.</p>
+  </header>
+
+  <div class="controls" role="group" aria-label="Simulation speed">
+    <button id="play" type="button">❚❚ Pause</button>
+    <span class="label">speed</span>
+    <button type="button" data-speed="1" aria-pressed="false">Real time</button>
+    <button type="button" data-speed="0.25" aria-pressed="true">4× slower</button>
+    <button type="button" data-speed="0.05" aria-pressed="false">20× slower</button>
+  </div>
+
+  <div class="stage"><canvas id="cv" aria-label="Animation of one decision travelling from the neural network to the arms"></canvas></div>
+  <div class="swipe">Swipe the diagram to see the whole path →</div>
+  <div class="legend"><span class="c">command (down)</span><span class="s">perception and confirmation (up)</span></div>
+
+  <div class="cols">
+    <section>
+      <h2>Sequence</h2>
+      <ol class="phases" id="phases"></ol>
+    </section>
+    <section>
+      <h2>Every layer has its own clock</h2>
+      <div class="layers">
+        <div class="layer"><span class="rate">1–3 s per decision</span><span class="name">Neural network (server)</span><p>Reads the whole scene and writes the tool call token by token. The slowest layer and the only one that reasons.</p></div>
+        <div class="layer"><span class="rate">≈ 50–200 ms</span><span class="name">Internet</span><p>Encrypted round trip between the server and the workshop. Short drops happen; the design must tolerate them.</p></div>
+        <div class="layer"><span class="rate">&lt; 5 ms</span><span class="name">MCP server (local PC)</span><p>Turns <code>move_object(…)</code> into a concrete task and returns the result: ok or grip failed.</p></div>
+        <div class="layer"><span class="rate">≈ 30 Hz</span><span class="name">Learned policy (VLA)</span><p>Local model such as SmolVLA or ACT. Watches the cameras and outputs chunks of joint actions.</p></div>
+        <div class="layer"><span class="rate">≈ 1 kHz</span><span class="name">Firmware</span><p>PID loop per joint, current limits and emergency stop. Always running, also to hold the arm still.</p></div>
+        <div class="layer"><span class="rate">PWM 50–330 Hz</span><span class="name">Servos and encoders</span><p>Move the joint and report its real position back to the firmware and the policy.</p></div>
+      </div>
+    </section>
+  </div>
+
+  <p class="note">The layers, nodes and connections of the neural network are a schematic: a real model has billions of parameters and its internal architecture is not public. Timings are typical orders of magnitude, not measurements of a real system.</p>
+</div>
+
+<script>
+(() => {
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const css = getComputedStyle(document.documentElement);
+  const C = {
+    bg: css.getPropertyValue('--panel').trim(),
+    line: css.getPropertyValue('--line').trim(),
+    fg: css.getPropertyValue('--fg').trim(),
+    muted: css.getPropertyValue('--muted').trim(),
+    cmd: css.getPropertyValue('--cmd').trim(),
+    cmdSoft: css.getPropertyValue('--cmd-soft').trim(),
+    sense: css.getPropertyValue('--sense').trim(),
+  };
+  const MONO = '"IBM Plex Mono", ui-monospace, Menlo, monospace';
+  const DISPLAY = '"Big Shoulders Display", "Arial Narrow", sans-serif';
+
+  // ---------- timeline (seconds of real system time) ----------
+  const PH = [
+    { a: 0.00, b: 0.25, up: true,  txt: 'Camera captures; the local detector labels the cup' },
+    { a: 0.25, b: 0.60, up: true,  txt: 'Scene (image + JSON) goes up to the server' },
+    { a: 0.60, b: 0.85, up: true,  txt: 'Prefill: the whole context crosses the layers in parallel' },
+    { a: 0.85, b: 1.95, up: false, txt: 'Decoding: one token per full pass through the network' },
+    { a: 1.95, b: 2.30, up: false, txt: 'The tool call travels down over the internet' },
+    { a: 2.30, b: 2.40, up: false, txt: 'The MCP server turns it into a task' },
+    { a: 2.40, b: 6.40, up: false, txt: 'Policy at 30 Hz + firmware at 1 kHz move the arm' },
+    { a: 6.40, b: 6.75, up: true,  txt: 'Grip confirmation goes up to the server' },
+    { a: 6.75, b: 7.40, up: true,  txt: 'The network reads the result and closes the task' },
+  ];
+  const LOOP = 8.6;
+  const EXEC_A = 2.40, EXEC_B = 6.40;
+  const TOK1 = ['move', '_object', '(', 'hand', '="', 'left', '",', ' from', '=', '2', ',', ' to', '=', '3', ')'];
+  const TOK2 = ['Done', ':', ' cup', ' in', ' station', ' 3'];
+  const DEC1 = [0.85, 1.95], DEC2 = [7.00, 7.40];
+
+  const phList = document.getElementById('phases');
+  PH.forEach(p => {
+    const li = document.createElement('li');
+    if (p.up) li.classList.add('up');
+    li.innerHTML = `<span>${p.txt}</span><span class="t">${p.a.toFixed(2)} s</span>`;
+    phList.appendChild(li);
+  });
+  const phItems = [...phList.children];
+
+  // ---------- geometry ----------
+  let W = 0, H = 0, G = null;
+  const L = 7, N = 12;              // schematic transformer: layers x nodes
+  let rnd = mulberry(7);
+  function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+  function path(pts) {
+    const cum = [0];
+    for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    const len = cum[cum.length - 1];
+    return {
+      pts, len,
+      at(u) {
+        const d = Math.max(0, Math.min(1, u)) * len;
+        let i = 1; while (i < cum.length - 1 && cum[i] < d) i++;
+        const s = (d - cum[i - 1]) / ((cum[i] - cum[i - 1]) || 1);
+        return [pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * s, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * s];
+      }
+    };
+  }
+  function wavy(x0, y0, x1, y1, amp, freq, ph, n = 48) {
+    const out = [];
+    for (let i = 0; i <= n; i++) {
+      const t = i / n, env = Math.sin(Math.PI * t);
+      out.push([x0 + (x1 - x0) * t, y0 + (y1 - y0) * t + amp * env * Math.sin(freq * Math.PI * 2 * t + ph)]);
+    }
+    return out;
+  }
+
+  function layout() {
+    const r = cv.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = r.width; H = r.height;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    rnd = mulberry(7);
+
+    const top = 64, bot = H - 26, yc = (top + bot) / 2;
+    const X = f => W * f;
+    const A = [X(.025), X(.33)], B = [X(.335), X(.45)], Cx = X(.485), D = [X(.53), X(.63)], E = [X(.655), X(.735)], F = [X(.75), X(.985)];
+    const g = { top, bot, yc, A, B, Cx, D, E, F };
+
+    // transformer columns: 0 = input, 1..L = hidden, L+1 = output
+    const netTop = top + 34, netBot = bot - 62;
+    g.cols = [];
+    const colsN = L + 2;
+    for (let c = 0; c < colsN; c++) {
+      const x = A[0] + 18 + (A[1] - A[0] - 40) * c / (colsN - 1);
+      const n = c === 0 ? 10 : c === colsN - 1 ? 5 : N;
+      const nodes = [];
+      for (let k = 0; k < n; k++) nodes.push([x + (rnd() - .5) * 6, netTop + (netBot - netTop) * (k + .5) / n + (rnd() - .5) * 6]);
+      g.cols.push(nodes);
+    }
+    g.edges = [];
+    for (let c = 0; c < colsN - 1; c++) {
+      for (let i = 0; i < g.cols[c].length; i++) {
+        const fan = c === 0 ? 5 : 4;
+        for (let k = 0; k < fan; k++) g.edges.push([c, i, Math.floor(rnd() * g.cols[c + 1].length)]);
+      }
+    }
+    g.inX = g.cols[0][0][0];
+    g.outY = bot - 30;
+
+    // small VLA net
+    g.vla = [];
+    for (let c = 0; c < 4; c++) {
+      const x = D[0] + 14 + (D[1] - D[0] - 28) * c / 3, n = c === 3 ? 4 : 6, nodes = [];
+      for (let k = 0; k < n; k++) nodes.push([x, yc - 70 + 140 * (k + .5) / n]);
+      g.vla.push(nodes);
+    }
+
+    // firmware lanes
+    g.lanes = [];
+    for (let j = 0; j < 12; j++) g.lanes.push(yc - 96 + j * 16 + (j >= 6 ? 12 : 0));
+
+    // arms workspace (top-down view)
+    const Fw = F[1] - F[0];
+    g.cam = [F[0] + Fw * .5, top + 20];
+    g.stY = bot - 40;
+    const baseY = top + (g.stY - top) * .42;
+    g.baseL = [F[0] + Fw * .3, baseY];
+    g.baseR = [F[0] + Fw * .7, baseY];
+    g.st = [0, 1, 2, 3, 4].map(i => [F[0] + Fw * (.1 + .2 * i), g.stY]);
+    const far = Math.max(...[0, 1, 2].map(i => Math.hypot(g.st[i][0] - g.baseL[0], g.stY - g.baseL[1])));
+    g.l1 = far * .54; g.l2 = far * .54;
+
+    // routes
+    const yUp = top + 6, yUp2 = top + 30;
+    g.yUp = yUp; g.yUp2 = yUp2;
+    g.cables = [];
+    for (let i = 0; i < 6; i++) {
+      const down = i % 2 === 0;
+      g.cables.push({ down, pts: wavy(B[0], yc, B[1], yc, (yc - top - 40) * (.3 + .13 * i), 1 + (i % 3) * .5, i * 1.3) });
+    }
+    const cable = i => g.cables[i].pts;
+    const rev = p => p.slice().reverse();
+    g.routeUp = [1, 3, 5].map(i => path([
+      [g.cam[0], g.cam[1] + 10], [g.cam[0], yUp + 10], [B[1], yUp + 10], [B[1], yc], ...rev(cable(i)), [B[0], yUp + 10], [g.inX, yUp + 10], [g.inX, netTop - 10]
+    ]));
+    g.routeResult = [1, 3, 5].map(i => path([
+      [Cx, yc - 16], [Cx, yUp + 10], [B[1], yUp + 10], [B[1], yc], ...rev(cable(i)), [B[0], yUp + 10], [g.inX, yUp + 10], [g.inX, netTop - 10]
+    ]));
+    const outNode = g.cols[colsN - 1][2];
+    g.routeDown = [0, 2, 4].map(i => path([
+      [outNode[0], outNode[1]], [A[1], yc], [B[0], yc], ...cable(i).slice(1), [Cx - 16, yc]
+    ]));
+    g.routeMcp = path([[Cx + 16, yc], [D[0], yc]]);
+    g.routeCamVla = path([[g.cam[0] - 8, g.cam[1] + 10], [g.cam[0] - 8, yUp2], [(D[0] + D[1]) / 2, yUp2], [(D[0] + D[1]) / 2, yc - 74]]);
+    g.routeAct = g.lanes.slice(0, 6).map(y => path([[D[1], yc], [E[0], y]]));
+    G = g;
+  }
+
+  // ---------- helpers ----------
+  const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+  const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  function rgba(hex, a) {
+    const h = hex.replace('#', ''), v = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+    return `rgba(${v >> 16 & 255},${v >> 8 & 255},${v & 255},${a})`;
+  }
+  function dot(x, y, r, col, glow = .25) {
+    ctx.fillStyle = rgba(col, glow); ctx.beginPath(); ctx.arc(x, y, r * 3, 0, 7); ctx.fill();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+  }
+  function label(x, y, title, sub, align = 'left') {
+    ctx.textAlign = align;
+    ctx.font = `600 15px ${DISPLAY}`; ctx.fillStyle = C.fg; ctx.fillText(title.toUpperCase(), x, y);
+    ctx.font = `11px ${MONO}`; ctx.fillStyle = C.muted; ctx.fillText(sub, x, y + 15);
+    ctx.textAlign = 'left';
+  }
+  // stateless particle stream: emitted at `rate` Hz within [a,b], each travels for `travel` s
+  function stream(ts, routes, a, b, rate, travel, col, r = 2.4) {
+    const k0 = Math.max(0, Math.floor((ts - travel - a) * rate)), k1 = Math.floor((Math.min(ts, b) - a) * rate);
+    for (let k = k0; k <= k1; k++) {
+      const te = a + k / rate; if (te > b) break;
+      const u = (ts - te) / travel; if (u < 0 || u > 1) continue;
+      const rt = Array.isArray(routes) ? routes[k % routes.length] : routes;
+      for (let s = 3; s >= 0; s--) {
+        const p = rt.at(u - s * .012);
+        if (s) { ctx.fillStyle = rgba(col, .18 - s * .04); ctx.beginPath(); ctx.arc(p[0], p[1], r * .9, 0, 7); ctx.fill(); }
+        else dot(p[0], p[1], r, col);
+      }
+    }
+  }
+  function decodeState(ts, win, toks) {
+    if (ts < win[0]) return { n: 0, frac: -1 };
+    const per = (win[1] - win[0]) / toks.length, i = Math.floor((ts - win[0]) / per);
+    if (i >= toks.length) return { n: toks.length, frac: -1 };
+    return { n: i, frac: (ts - win[0] - i * per) / per };
+  }
+
+  // ---------- arm kinematics ----------
+  function ik(base, tgt, l1, l2, side) {
+    const dx = tgt[0] - base[0], dy = tgt[1] - base[1];
+    const d = clamp(Math.hypot(dx, dy), 4, l1 + l2 - 1);
+    const a = Math.atan2(dy, dx), b = Math.acos(clamp((l1 * l1 + d * d - l2 * l2) / (2 * l1 * d), -1, 1));
+    const a1 = a + side * b;
+    const elbow = [base[0] + l1 * Math.cos(a1), base[1] + l1 * Math.sin(a1)];
+    const k = Math.min(1, (l1 + l2 - 1) / Math.hypot(dx, dy));
+    return { elbow, wrist: [base[0] + dx * k, base[1] + dy * k] };
+  }
+  function armPlan(ts) {
+    const g = G, restL = [g.baseL[0] - g.l1 * .1, g.baseL[1] + g.l1 * 1.8];
+    const s2 = g.st[1], s3 = g.st[2];
+    let tgt = restL, grip = 1, carry = false, cup = s2, moving = false;
+    if (ts >= EXEC_A && ts < EXEC_B) {
+      const u = (ts - EXEC_A) / (EXEC_B - EXEC_A); moving = true;
+      if (u < .3) tgt = lerp(restL, s2, ease(u / .3));
+      else if (u < .4) { tgt = s2; grip = 1 - (u - .3) / .1; }
+      else if (u < .75) { tgt = lerp(s2, s3, ease((u - .4) / .35)); grip = 0; carry = true; }
+      else if (u < .85) { tgt = s3; grip = (u - .75) / .1; cup = s3; }
+      else { tgt = lerp(s3, restL, ease((u - .85) / .15)); cup = s3; }
+    } else if (ts >= EXEC_B) cup = s3;
+    return { tgt, grip, carry, cup, moving };
+  }
+  function drawArm(base, tgt, grip, side, active, ts) {
+    const g = G, { elbow, wrist } = ik(base, tgt, g.l1, g.l2, side);
+    const linkCol = active ? C.fg : rgba(C.fg, .55);
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = rgba(active ? C.cmd : C.sense, .16); ctx.lineWidth = 16;
+    ctx.beginPath(); ctx.moveTo(...base); ctx.lineTo(...elbow); ctx.lineTo(...wrist); ctx.stroke();
+    ctx.strokeStyle = linkCol; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(...base); ctx.lineTo(...elbow); ctx.lineTo(...wrist); ctx.stroke();
+    // gripper
+    const v = [(wrist[0] - elbow[0]) / g.l2, (wrist[1] - elbow[1]) / g.l2], n = [-v[1], v[0]];
+    const w = 4 + 5 * grip;
+    ctx.lineWidth = 3; ctx.strokeStyle = linkCol;
+    for (const s of [-1, 1]) {
+      const b0 = [wrist[0] + n[0] * w * s, wrist[1] + n[1] * w * s];
+      ctx.beginPath(); ctx.moveTo(wrist[0] - v[0] * 3 + n[0] * w * s, wrist[1] - v[1] * 3 + n[1] * w * s); ctx.lineTo(b0[0] + v[0] * 11, b0[1] + v[1] * 11); ctx.stroke();
+    }
+    const jitter = active ? (Math.sin(ts * 900) * .5) : 0;
+    for (const p of [base, elbow, wrist]) {
+      ctx.fillStyle = C.bg; ctx.beginPath(); ctx.arc(p[0], p[1], 6.5, 0, 7); ctx.fill();
+      ctx.strokeStyle = active ? C.cmd : rgba(C.sense, .7); ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(p[0] + jitter, p[1], 6.5, 0, 7); ctx.stroke();
+    }
+    return { wrist, v };
+  }
+
+  // ---------- frame ----------
+  function frame(ts) {
+    const g = G;
+    ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+
+    // dotted grid
+    ctx.fillStyle = rgba(C.muted, .1);
+    for (let x = 12; x < W; x += 24) for (let y = 12; y < H; y += 24) ctx.fillRect(x, y, 1, 1);
+
+    const inPh = PH.findIndex(p => ts >= p.a && ts < p.b);
+
+    // labels
+    label(g.A[0], 26, 'Neural network', 'server · 1–3 s per decision');
+    label((g.B[0] + g.B[1]) / 2, 26, 'Internet', '≈ 50–200 ms', 'center');
+    label(g.Cx, 26, 'MCP', 'local PC · < 5 ms', 'center');
+    label((g.D[0] + g.D[1]) / 2, 26, 'VLA policy', 'local · 30 Hz', 'center');
+    label((g.E[0] + g.E[1]) / 2, 26, 'Firmware', 'PID · 1 kHz', 'center');
+    label(g.F[1], 26, 'Arms', 'servos + encoders', 'right');
+
+    // separators
+    ctx.strokeStyle = C.line; ctx.lineWidth = 1;
+    for (const x of [g.A[1] + 2, g.B[1] + 10, g.D[0] - 14, g.E[1] + 6]) { ctx.beginPath(); ctx.moveTo(x, 48); ctx.lineTo(x, H - 10); ctx.stroke(); }
+
+    // buses
+    ctx.setLineDash([2, 5]); ctx.lineWidth = 1;
+    ctx.strokeStyle = rgba(C.sense, .35);
+    ctx.beginPath(); ctx.moveTo(g.cam[0], g.cam[1] + 10); ctx.lineTo(g.cam[0], g.yUp + 10); ctx.lineTo(g.B[1], g.yUp + 10); ctx.moveTo(g.B[0], g.yUp + 10); ctx.lineTo(g.inX, g.yUp + 10); ctx.lineTo(g.inX, g.cols[0][0][1] - 14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(g.cam[0] - 8, g.cam[1] + 10); ctx.lineTo(g.cam[0] - 8, g.yUp2); ctx.lineTo((g.D[0] + g.D[1]) / 2, g.yUp2); ctx.lineTo((g.D[0] + g.D[1]) / 2, g.yc - 74); ctx.stroke();
+    ctx.strokeStyle = rgba(C.cmd, .35);
+    ctx.beginPath(); ctx.moveTo(g.A[1] - 6, g.yc); ctx.lineTo(g.B[0], g.yc); ctx.moveTo(g.B[1], g.yc); ctx.lineTo(g.D[0], g.yc); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // internet cables
+    for (const cb of g.cables) {
+      ctx.strokeStyle = rgba(cb.down ? C.cmd : C.sense, .22); ctx.lineWidth = 1; ctx.setLineDash([1, 4]);
+      ctx.beginPath(); cb.pts.forEach((p, i) => i ? ctx.lineTo(...p) : ctx.moveTo(...p)); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    // ---- transformer ----
+    let wave = -9, waveCol = C.cmd, broad = false;
+    if (ts >= .60 && ts < .85) { wave = (ts - .60) / .25 * (L + 2.5) - .5; waveCol = C.sense; broad = true; }
+    if (ts >= 6.75 && ts < 7.00) { wave = (ts - 6.75) / .25 * (L + 2.5) - .5; waveCol = C.sense; broad = true; }
+    const d1 = decodeState(ts, DEC1, TOK1), d2 = decodeState(ts, DEC2, TOK2);
+    const dd = d1.frac >= 0 ? d1 : d2;
+    if (dd.frac >= 0) { wave = dd.frac * (L + 2.2) - .3; waveCol = C.cmd; }
+
+    ctx.lineWidth = .6; ctx.strokeStyle = rgba(C.sense, .09);
+    ctx.beginPath();
+    for (const [c, i, j] of g.edges) { const a = g.cols[c][i], b = g.cols[c + 1][j]; ctx.moveTo(...a); ctx.lineTo(...b); }
+    ctx.stroke();
+    if (wave > -2) {
+      ctx.lineWidth = 1;
+      for (const [c, i, j] of g.edges) {
+        const al = clamp(1 - Math.abs(wave - (c + .5)) / (broad ? 1.1 : .75));
+        if (al <= 0) continue;
+        if (!broad && ((i * 7 + j * 3 + c) % 3 === 0)) continue;
+        const a = g.cols[c][i], b = g.cols[c + 1][j];
+        ctx.strokeStyle = rgba(waveCol, al * .75); ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
+      }
+    }
+    g.cols.forEach((col, c) => col.forEach((p, k) => {
+      const al = wave > -2 ? clamp(1 - Math.abs(wave - c) / .9) : 0;
+      if (c === 0) {
+        const lit = (ts >= .25 && ts < .85) || (ts >= 6.4 && ts < 7);
+        ctx.fillStyle = k < 6 ? rgba(C.sense, lit ? .9 : .35) : rgba(C.fg, lit ? .8 : .3);
+        ctx.fillRect(p[0] - 3.5, p[1] - 3.5, 7, 7);
+      } else if (al > .05) dot(p[0], p[1], 2.4 + al, waveCol, .25 * al);
+      else { ctx.fillStyle = rgba(C.muted, .5); ctx.beginPath(); ctx.arc(p[0], p[1], 1.8, 0, 7); ctx.fill(); }
+    }));
+    ctx.font = `10px ${MONO}`; ctx.fillStyle = C.muted;
+    ctx.fillText('input', g.inX - 10, g.cols[0][g.cols[0].length - 1][1] + 20);
+    ctx.textAlign = 'right'; ctx.fillText(`${L} layers (schematic)`, g.A[1] - 6, g.cols[0][g.cols[0].length - 1][1] + 20); ctx.textAlign = 'left';
+
+    // generated text
+    let txt, col;
+    if (ts >= DEC2[0]) { txt = TOK2.slice(0, d2.n + (d2.frac >= 0 ? 1 : 0)).join(''); col = C.sense; }
+    else { txt = TOK1.slice(0, d1.n + (d1.frac >= 0 ? 1 : 0)).join(''); col = C.cmdSoft; }
+    ctx.font = `12px ${MONO}`; ctx.fillStyle = C.muted; ctx.fillText('›', g.A[0] + 4, g.outY);
+    ctx.fillStyle = col; ctx.fillText(txt, g.A[0] + 16, g.outY);
+    const tw = ctx.measureText(txt).width;
+    if (Math.floor(ts * 4) % 2 === 0 || dd.frac >= 0) { ctx.fillStyle = col; ctx.fillRect(g.A[0] + 18 + tw, g.outY - 10, 7, 12); }
+    const ntok = ts >= DEC2[0] ? d2.n : d1.n;
+    ctx.font = `10px ${MONO}`; ctx.fillStyle = C.muted;
+    ctx.fillText(`tokens: ${ntok}  ·  ~${Math.round((DEC1[1] - DEC1[0]) / TOK1.length * 1000)} ms per token`, g.A[0] + 16, g.outY + 16);
+
+    // ---- MCP ----
+    const mcpOn = ts >= 2.25 && ts < 2.45 || ts >= 6.38 && ts < 6.5;
+    ctx.strokeStyle = mcpOn ? C.cmd : rgba(C.fg, .4); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(g.Cx, g.yc, 15, 0, 7); ctx.stroke();
+    ctx.strokeStyle = rgba(mcpOn ? C.cmd : C.muted, .5); ctx.setLineDash([2, 3]);
+    ctx.beginPath(); ctx.arc(g.Cx, g.yc, 22, ts * 2, ts * 2 + 4.5); ctx.stroke(); ctx.setLineDash([]);
+    ctx.font = `10px ${MONO}`; ctx.fillStyle = C.fg; ctx.textAlign = 'center'; ctx.fillText('MCP', g.Cx, g.yc + 3.5);
+    ctx.fillStyle = C.muted;
+    ctx.fillText(ts >= 2.3 && ts < 6.4 ? 'task active' : ts >= 6.4 ? 'ok' : 'idle', g.Cx, g.yc + 42); ctx.textAlign = 'left';
+
+    // ---- VLA ----
+    const exec = ts >= EXEC_A && ts < EXEC_B;
+    const vph = exec ? ((ts - EXEC_A) * 30) % 1 : -1;
+    for (let c = 0; c < 3; c++) for (const a of g.vla[c]) for (const b of g.vla[c + 1]) {
+      const al = exec ? clamp(1 - Math.abs(vph * 4 - (c + .5)) / .8) : 0;
+      ctx.strokeStyle = al ? rgba(C.cmd, .15 + al * .5) : rgba(C.sense, .08); ctx.lineWidth = .7;
+      ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
+    }
+    g.vla.forEach((col, c) => col.forEach(p => {
+      const al = exec ? clamp(1 - Math.abs(vph * 4 - c) / .8) : 0;
+      if (al > .05) dot(p[0], p[1], 2.4, C.cmd, .25 * al);
+      else { ctx.fillStyle = rgba(C.muted, .55); ctx.beginPath(); ctx.arc(p[0], p[1], 2, 0, 7); ctx.fill(); }
+    }));
+    ctx.font = `10px ${MONO}`; ctx.fillStyle = C.muted; ctx.textAlign = 'center';
+    ctx.fillText(exec ? `cycle ${Math.floor((ts - EXEC_A) * 30)}` : 'idle', (g.D[0] + g.D[1]) / 2, g.yc + 92);
+    ctx.textAlign = 'left';
+
+    // ---- firmware lanes ----
+    g.lanes.forEach((y, j) => {
+      const left = j < 6, act = left && exec;
+      ctx.strokeStyle = act ? rgba(C.cmd, .85) : rgba(C.sense, .3); ctx.lineWidth = act ? 1.6 : 1;
+      ctx.setLineDash([2, 6]); ctx.lineDashOffset = -((ts * 1000 * .8) % 8);
+      ctx.beginPath(); ctx.moveTo(g.E[0], y); ctx.lineTo(g.E[1], y); ctx.stroke();
+      ctx.setLineDash([]); ctx.lineDashOffset = 0;
+      ctx.strokeStyle = act ? rgba(C.cmd, .25) : rgba(C.sense, .1); ctx.lineWidth = 1;
+      const base = left ? g.baseL : g.baseR;
+      ctx.beginPath(); ctx.moveTo(g.E[1], y); ctx.bezierCurveTo(g.E[1] + 30, y, base[0] - 40, base[1], base[0], base[1]); ctx.stroke();
+      ctx.font = `9px ${MONO}`; ctx.fillStyle = act ? C.cmdSoft : C.muted;
+      ctx.fillText(`${left ? 'L' : 'R'}${j % 6 + 1}`, g.E[0] - 20, y + 3);
+    });
+
+    // ---- workspace ----
+    const plan = armPlan(ts);
+    // rail + stations
+    ctx.strokeStyle = rgba(C.fg, .18); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(g.F[0] + 6, g.stY + 16); ctx.lineTo(g.F[1] - 6, g.stY + 16); ctx.stroke();
+    g.st.forEach((p, i) => {
+      ctx.strokeStyle = rgba(C.fg, .35); ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(p[0] - 13, p[1] - 9); ctx.lineTo(p[0] + 13, p[1] - 9); ctx.lineTo(p[0] + 16, p[1] - 6); ctx.lineTo(p[0] + 16, p[1] + 9);
+      ctx.lineTo(p[0] - 16, p[1] + 9); ctx.lineTo(p[0] - 16, p[1] - 6); ctx.closePath(); ctx.stroke();
+      ctx.font = `10px ${MONO}`; ctx.fillStyle = C.muted; ctx.textAlign = 'center'; ctx.fillText(`S${i + 1}`, p[0], p[1] + 30); ctx.textAlign = 'left';
+    });
+    // camera + FOV
+    const flash = ts < .25 || (ts >= 6.3 && ts < 6.45);
+    ctx.fillStyle = rgba(C.sense, flash ? .07 : .03);
+    ctx.beginPath(); ctx.moveTo(g.cam[0], g.cam[1]); ctx.lineTo(g.F[0] + 4, g.stY + 22); ctx.lineTo(g.F[1] - 4, g.stY + 22); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = C.bg; ctx.strokeStyle = flash ? C.sense : rgba(C.sense, .7); ctx.lineWidth = 1.5;
+    ctx.fillRect(g.cam[0] - 13, g.cam[1] - 8, 26, 16); ctx.strokeRect(g.cam[0] - 13, g.cam[1] - 8, 26, 16);
+    ctx.beginPath(); ctx.arc(g.cam[0], g.cam[1], 4.5, 0, 7); ctx.stroke();
+
+    drawArm(g.baseR, [g.baseR[0] + g.l1 * .1, g.baseR[1] + g.l1 * 1.8], 1, -1, false, ts);
+    const lArm = drawArm(g.baseL, plan.tgt, plan.grip, 1, plan.moving, ts);
+    const cupP = plan.carry ? [lArm.wrist[0] + lArm.v[0] * 6, lArm.wrist[1] + lArm.v[1] * 6] : plan.cup;
+    ctx.fillStyle = rgba(C.fg, .9); ctx.beginPath(); ctx.arc(cupP[0], cupP[1], 6.5, 0, 7); ctx.fill();
+    ctx.fillStyle = C.bg; ctx.beginPath(); ctx.arc(cupP[0], cupP[1], 3.5, 0, 7); ctx.fill();
+    // detection box
+    ctx.strokeStyle = C.sense; ctx.lineWidth = 1;
+    ctx.strokeRect(cupP[0] - 12, cupP[1] - 12, 24, 24);
+    ctx.font = `9px ${MONO}`; const tag = 'C03 cup 0.97'; const tw2 = ctx.measureText(tag).width;
+    ctx.fillStyle = C.sense; ctx.fillRect(cupP[0] - 12, cupP[1] - 25, tw2 + 8, 12);
+    ctx.fillStyle = C.bg; ctx.fillText(tag, cupP[0] - 8, cupP[1] - 16);
+    ctx.font = `10px ${MONO}`; ctx.fillStyle = C.muted; ctx.textAlign = 'center';
+    ctx.fillText('left hand', g.baseL[0], g.baseL[1] - 14); ctx.fillText('right hand', g.baseR[0], g.baseR[1] - 14);
+    ctx.textAlign = 'left';
+
+    // ---- particles ----
+    stream(ts, g.routeUp, .22, .42, 18, .36, C.sense);
+    stream(ts, g.routeDown, 1.92, 2.08, 22, .30, C.cmd);
+    stream(ts, g.routeMcp, 2.30, 2.38, 30, .06, C.cmd);
+    stream(ts, g.routeCamVla, EXEC_A, EXEC_B, 30, .08, C.sense, 1.8);
+    stream(ts, g.routeAct, EXEC_A + .02, EXEC_B, 30 * 6, .05, C.cmd, 1.6);
+    stream(ts, g.routeResult, 6.40, 6.50, 22, .32, C.sense);
+
+    // ---- clock ----
+    ctx.textAlign = 'right'; ctx.font = `500 12px ${MONO}`; ctx.fillStyle = C.fg;
+    ctx.fillText(`t = ${ts.toFixed(3)} s`, W - 14, H - 10);
+    ctx.fillStyle = C.muted; ctx.font = `11px ${MONO}`;
+    ctx.fillText(speed === 1 ? 'real time' : `${Math.round(1 / speed)}× slower`, W - 120, H - 10);
+    ctx.textAlign = 'left';
+
+    // phases list
+    if (inPh !== lastPh) { phItems.forEach((li, i) => li.classList.toggle('on', i === inPh)); lastPh = inPh; }
+  }
+
+  // ---------- loop + controls ----------
+  let speed = 0.25, playing = true, simT = 0, last = performance.now(), lastPh = -2;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) { playing = false; simT = 4.1; }
+  const playBtn = document.getElementById('play');
+  const setPlay = p => { playing = p; playBtn.textContent = p ? '❚❚ Pause' : '▶ Play'; };
+  setPlay(playing);
+  playBtn.addEventListener('click', () => setPlay(!playing));
+  document.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => {
+    speed = +b.dataset.speed;
+    document.querySelectorAll('[data-speed]').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+  }));
+
+  function tick(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    if (playing) simT += dt * speed;
+    frame(((simT % LOOP) + LOOP) % LOOP);
+    requestAnimationFrame(tick);
+  }
+  layout();
+  new ResizeObserver(() => { layout(); frame(((simT % LOOP) + LOOP) % LOOP); }).observe(cv);
+  document.fonts && document.fonts.ready.then(() => frame(((simT % LOOP) + LOOP) % LOOP));
+  requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
