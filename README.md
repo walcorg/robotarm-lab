@@ -46,9 +46,38 @@ flowchart LR
 4. **Same interface from simulation to the real arms.** The MCP layer talks to a `Backend`;
    the simulated backend, the SO-101 test arms and the custom arms all implement it.
 
-## Concept sketches
+## Design
 
-Early 3D sketches made in Autodesk Inventor. Dimensions and parts are not final.
+### Concept render
+
+![Hydroponic sprouter system with the dual-arm carriage, AI-enhanced render](docs/images/sprouter-render-ai.png)
+
+*This image was enhanced with AI (neural rendering) from the CAD concept. It is an
+illustration, not the engineering model: details such as the spray bar, control cabinet and
+signage are artistic and may differ from the final design.*
+
+### Current CAD model
+
+Created with **Autodesk Inventor**. Dimensions and parts are not final.
+
+**Rotating reel and dual-arm carriage**: twelve cultivation tubes mounted on two 12-spoke hubs
+around a central shaft. The reel rotates to bring each tube to the arms. Both arms sit back to
+back on one sliding carriage that runs along a rail above the reel.
+
+<table>
+  <tr>
+    <td><img src="docs/images/reel-v2-arms-side.png" alt="Rotating reel with twelve tubes and the dual-arm carriage, side isometric view"></td>
+    <td><img src="docs/images/reel-v2-arms-front.png" alt="Rotating reel with twelve tubes and the dual-arm carriage, front isometric view"></td>
+  </tr>
+</table>
+
+**Dual-arm carriage on the rail**:
+
+<img src="docs/images/arms-carriage-rail.png" alt="Two arms mounted back to back on a sliding carriage over the rail">
+
+### Earlier iterations
+
+First 3D sketches, also created with **Autodesk Inventor**.
 
 **Reel-shaped grow rack with the arm**: cultivation tubes arranged as a reel on a steel frame,
 with the arm mounted beside it.
