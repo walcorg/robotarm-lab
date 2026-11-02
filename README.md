@@ -46,6 +46,30 @@ flowchart LR
 4. **Same interface from simulation to the real arms.** The MCP layer talks to a `Backend`;
    the simulated backend, the SO-101 test arms and the custom arms all implement it.
 
+## Concept sketches
+
+Early 3D sketches made in Autodesk Inventor. Dimensions and parts are not final.
+
+**Reel-shaped grow rack with the arm**: cultivation tubes arranged as a reel on a steel frame,
+with the arm mounted beside it.
+
+<table>
+  <tr>
+    <td><img src="docs/images/reel-rack-arm-front.png" alt="Reel-shaped grow rack with the arm, front isometric view"></td>
+    <td><img src="docs/images/reel-rack-arm-back.png" alt="Reel-shaped grow rack with the arm, rear isometric view"></td>
+  </tr>
+</table>
+
+**Arm**: base joint with a large stepper and housing, two links, and smaller steppers at the
+elbow and the wrist.
+
+<table>
+  <tr>
+    <td><img src="docs/images/arm-sketch-side.png" alt="Arm sketch, side view"></td>
+    <td><img src="docs/images/arm-sketch-top.png" alt="Arm sketch, top view"></td>
+  </tr>
+</table>
+
 ## Status
 
 | Phase | Goal | State |
