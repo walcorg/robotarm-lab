@@ -36,6 +36,12 @@ class Backend(ABC):
     def reset(self) -> ActionResult:
         """Clear a software stop. Fails while the hardware e-stop is pressed."""
 
+    def rotate_reel(self, hand: str, steps: int) -> ActionResult:
+        """Advance the reel `steps` positions with `hand`: lift the latch, push a hub peg,
+        release, and confirm the latch seated again at every step.
+        Codes: ok, latch_failed (rotation stops at the last position where the latch seated)."""
+        raise NotImplementedError("this backend has no reel")
+
     def capture(self) -> bytes | None:
         """JPEG of the workcell camera, or None if this backend has no camera."""
         return None

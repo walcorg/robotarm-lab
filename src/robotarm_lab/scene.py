@@ -25,11 +25,19 @@ class HandState:
 
 
 @dataclass
+class ReelState:
+    positions: int
+    tube_at_work: int            # tube currently facing the arms (1-based)
+    latched: bool                # spring latch seated in an indexing notch
+
+
+@dataclass
 class Scene:
     timestamp: float
     estopped: bool
     objects: list[ObjectState] = field(default_factory=list)
     hands: list[HandState] = field(default_factory=list)
+    reel: ReelState | None = None
 
     def to_dict(self) -> dict:
         d = asdict(self)

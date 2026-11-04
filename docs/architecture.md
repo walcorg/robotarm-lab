@@ -66,6 +66,12 @@ If no valid frame arrives for 100 ms the firmware ramps to *hold*.
 - Wrist cameras (one per hand): input to the policy only; never sent to Claude.
 - Claude receives an image only when it asks (`capture`, phase 1) or when the scene is ambiguous.
 
+## Reel
+
+The cultivation reel has no motor. The arms turn it by pushing pegs on the hub; a ratchet
+keeps it from rolling back and a spring latch locks it at each of the 12 positions. Details and
+trade-offs: [design/reel-indexing.md](design/reel-indexing.md).
+
 ## Why stations
 
 Free-form manipulation spends most of its error budget estimating where an object is and how it

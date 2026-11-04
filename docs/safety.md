@@ -13,6 +13,9 @@ That includes Claude, the network, the MCP server and the learned policy.
 | Command watchdog | Firmware | No valid frame for 100 ms → ramp to hold |
 | Thermal cut-back | Firmware | Per motor driver |
 | Self-collision zones | Firmware (phase 3) | Simple capsule check between the two arms |
+| Reel spring latch (normally locked) | Mechanism | Reel cannot move unless a hand holds the latch open |
+| Reel ratchet | Mechanism | Reel cannot roll back while a hand re-grips |
+| Reel interlock | Firmware + MCP server | Reel turns only with both hands at home; station work only with the latch seated |
 | Reachability, occupancy | MCP server | Rejects impossible plans before motion |
 | Software stop | MCP server → firmware | `stop` tool; latches until a human-approved `reset` |
 | Task judgment | Claude | Stops when the scene looks wrong; asks the human |
@@ -29,4 +32,6 @@ That includes Claude, the network, the MCP server and the learned policy.
 - [ ] Each joint stops at its soft limit before the mechanical stop
 - [ ] Current limit trips on a stalled joint within 200 ms
 - [ ] Unplugging USB / CAN puts the arm in hold within 100 ms
+- [ ] Reel stays locked with power off and with a full imbalance load on one side
+- [ ] Latch-seated switch reads correctly at all 12 positions
 - [ ] Power loss does not drop a held object onto a person (brake or non-backdrivable wrist)

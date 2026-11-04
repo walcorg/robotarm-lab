@@ -40,6 +40,14 @@ id = 5
 label = "outbound"
 position_mm = [360, 260, 0]
 
+# Rotating cultivation reel. There is no reel motor: the arms turn it by pushing pegs on the
+# hub, a ratchet only lets it advance forward, and a spring latch drops into one of the
+# indexing notches at every position (normally locked). See docs/design/reel-indexing.md.
+[reel]
+positions = 12
+tube_at_work = 1           # tube facing the arms at start-up (simulation)
+hands = ["left", "right"]  # hands that can reach the latch and the pegs
+
 # Initial contents, used by the simulated backend.
 [[objects]]
 id = "C03"

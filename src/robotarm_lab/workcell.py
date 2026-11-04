@@ -29,12 +29,25 @@ class InitialObject:
     station: int
 
 
+@dataclass(frozen=True)
+class Reel:
+    """Arm-driven rotating reel: forward-only ratchet, spring latch at every position."""
+    positions: int
+    tube_at_work: int
+    hands: frozenset[str]
+
+    def steps_to(self, current: int, tube: int) -> int:
+        """Forward steps needed to bring `tube` to the arms (the ratchet blocks reverse)."""
+        return (tube - current) % self.positions
+
+
 @dataclass
 class Workcell:
     name: str
     stations: dict[int, Station]
     hands: dict[str, Hand]
     initial_objects: list[InitialObject] = field(default_factory=list)
+    reel: Reel | None = None
 
     def can_reach(self, hand: str, station: int) -> bool:
         return hand in self.hands and station in self.hands[hand].reach
@@ -67,4 +80,15 @@ class Workcell:
                 raise ValueError(f"station {obj.station} holds more than one object")
             used.add(obj.station)
             objects.append(obj)
-        return cls(data.get("workcell", {}).get("name", "workcell"), stations, hands, objects)
+        reel = None
+        if "reel" in data:
+            r = data["reel"]
+            n = int(r["positions"])
+            at = int(r.get("tube_at_work", 1))
+            if n < 2 or not 1 <= at <= n:
+                raise ValueError(f"reel needs >= 2 positions and 1 <= tube_at_work <= {n}")
+            rh = frozenset(r.get("hands", list(hands)))
+            if rh - hands.keys():
+                raise ValueError(f"reel lists undefined hands {sorted(rh - hands.keys())}")
+            reel = Reel(n, at, rh)
+        return cls(data.get("workcell", {}).get("name", "workcell"), stations, hands, objects, reel)

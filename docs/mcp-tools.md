@@ -20,6 +20,8 @@ happened.
 | `move_object` | `hand`, `from_station`, `to_station` | Pick, place and return home. Validated before any motion. Preferred for simple transfers. |
 | `pick` | `hand`, `station` | Grasp only. Used for hand-overs and multi-step tasks. |
 | `place` | `hand`, `station` | Release the held object into an empty station. |
+| `bring_tube` | `tube`, `hand` (optional) | Turn the reel forward until `tube` faces the arms. See [reel indexing](design/reel-indexing.md). |
+| `rotate_reel` | `hand`, `steps` (1–11) | Advance the reel an exact number of positions. Forward only. |
 | `home` | `hand` | Return to home pose, keep the held object. |
 | `stop` | – | Halt all motion; latches. |
 | `reset` | – | Clear a software stop. Only after the human confirms. |
@@ -43,6 +45,10 @@ Planned for phase 1:
 | `hand_busy` | Hand already holds something | Place it first |
 | `hand_empty` | `place` without holding anything | Re-read scene |
 | `unreachable` | Station outside that hand's reach | Use the other hand or a hand-over via the shared station |
+| `arms_not_clear` | A hand is not at home while the reel should turn | Send both hands home, then retry |
+| `latch_failed` | Reel latch did not seat after a step; reel is unlocked | Rotate one more step to seat it; if it fails again, stop and ask |
+| `reel_unlatched` | Station work refused because the reel is not locked | Seat the latch first (`rotate_reel` 1 step) |
+| `no_reel` | This workcell has no reel | Do not use reel tools |
 | `estopped` | Cell is stopped | Tell the human; do not call `reset` on your own |
 | `invalid_argument` | Unknown hand or station | Fix the call |
 | `backend_error` | Hardware or policy fault | Stop and report |

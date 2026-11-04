@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" font-family="Helvetica, Arial, sans-serif">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#d9434e"/></marker></defs>
+<rect width="960" height="600" fill="#ffffff"/>
+<text x="32" y="44" font-size="22" font-weight="700" fill="#1f2731">Reel indexing: the arms turn and lock the reel</text>
+<text x="32" y="70" font-size="14" fill="#6b7785">Design intent: like pushing a wheelchair rim, but with pegs instead of friction. Schematic, not to scale.</text>
+<polygon points="300.0,184.0 303.6,184.0 307.9,170.2 311.8,170.5 315.7,170.8 319.6,171.3 323.5,171.8 327.3,172.5 331.2,173.3 335.0,174.1 338.8,175.1 342.6,176.2 346.4,177.3 350.1,178.6 353.8,180.0 357.4,181.4 361.0,183.0 364.6,184.6 368.1,186.3 364.9,200.5 368.0,202.2 371.1,204.0 381.7,194.2 385.0,196.4 388.2,198.6 391.3,201.0 394.4,203.4 397.4,205.9 400.4,208.5 403.3,211.2 406.1,213.9 408.8,216.7 411.5,219.6 414.1,222.6 416.6,225.6 419.0,228.7 421.4,231.8 423.6,235.0 425.8,238.3 416.0,248.9 417.8,252.0 419.5,255.1 433.7,251.9 435.4,255.4 437.0,259.0 438.6,262.6 440.0,266.2 441.4,269.9 442.7,273.6 443.8,277.4 444.9,281.2 445.9,285.0 446.7,288.8 447.5,292.7 448.2,296.5 448.7,300.4 449.2,304.3 449.5,308.2 449.8,312.1 436.0,316.4 436.0,320.0 436.0,323.6 449.8,327.9 449.5,331.8 449.2,335.7 448.7,339.6 448.2,343.5 447.5,347.3 446.7,351.2 445.9,355.0 444.9,358.8 443.8,362.6 442.7,366.4 441.4,370.1 440.0,373.8 438.6,377.4 437.0,381.0 435.4,384.6 433.7,388.1 419.5,384.9 417.8,388.0 416.0,391.1 425.8,401.7 423.6,405.0 421.4,408.2 419.0,411.3 416.6,414.4 414.1,417.4 411.5,420.4 408.8,423.3 406.1,426.1 403.3,428.8 400.4,431.5 397.4,434.1 394.4,436.6 391.3,439.0 388.2,441.4 385.0,443.6 381.7,445.8 371.1,436.0 368.0,437.8 364.9,439.5 368.1,453.7 364.6,455.4 361.0,457.0 357.4,458.6 353.8,460.0 350.1,461.4 346.4,462.7 342.6,463.8 338.8,464.9 335.0,465.9 331.2,466.7 327.3,467.5 323.5,468.2 319.6,468.7 315.7,469.2 311.8,469.5 307.9,469.8 303.6,456.0 300.0,456.0 296.4,456.0 292.1,469.8 288.2,469.5 284.3,469.2 280.4,468.7 276.5,468.2 272.7,467.5 268.8,466.7 265.0,465.9 261.2,464.9 257.4,463.8 253.6,462.7 249.9,461.4 246.2,460.0 242.6,458.6 239.0,457.0 235.4,455.4 231.9,453.7 235.1,439.5 232.0,437.8 228.9,436.0 218.3,445.8 215.0,443.6 211.8,441.4 208.7,439.0 205.6,436.6 202.6,434.1 199.6,431.5 196.7,428.8 193.9,426.1 191.2,423.3 188.5,420.4 185.9,417.4 183.4,414.4 181.0,411.3 178.6,408.2 176.4,405.0 174.2,401.7 184.0,391.1 182.2,388.0 180.5,384.9 166.3,388.1 164.6,384.6 163.0,381.0 161.4,377.4 160.0,373.8 158.6,370.1 157.3,366.4 156.2,362.6 155.1,358.8 154.1,355.0 153.3,351.2 152.5,347.3 151.8,343.5 151.3,339.6 150.8,335.7 150.5,331.8 150.2,327.9 164.0,323.6 164.0,320.0 164.0,316.4 150.2,312.1 150.5,308.2 150.8,304.3 151.3,300.4 151.8,296.5 152.5,292.7 153.3,288.8 154.1,285.0 155.1,281.2 156.2,277.4 157.3,273.6 158.6,269.9 160.0,266.2 161.4,262.6 163.0,259.0 164.6,255.4 166.3,251.9 180.5,255.1 182.2,252.0 184.0,248.9 174.2,238.3 176.4,235.0 178.6,231.8 181.0,228.7 183.4,225.6 185.9,222.6 188.5,219.6 191.2,216.7 193.9,213.9 196.7,211.2 199.6,208.5 202.6,205.9 205.6,203.4 208.7,201.0 211.8,198.6 215.0,196.4 218.3,194.2 228.9,204.0 232.0,202.2 235.1,200.5 231.9,186.3 235.4,184.6 239.0,183.0 242.6,181.4 246.2,180.0 249.9,178.6 253.6,177.3 257.4,176.2 261.2,175.1 265.0,174.1 268.8,173.3 272.7,172.5 276.5,171.8 280.4,171.3 284.3,170.8 288.2,170.5 292.1,170.2 296.4,184.0" fill="#f4f6f8" stroke="#1f2731" stroke-width="2"/>
+<text x="300.0" y="206.0" font-size="11" text-anchor="middle" fill="#6b7785">1</text>
+<text x="359.0" y="221.8" font-size="11" text-anchor="middle" fill="#6b7785">2</text>
+<text x="402.2" y="265.0" font-size="11" text-anchor="middle" fill="#6b7785">3</text>
+<text x="418.0" y="324.0" font-size="11" text-anchor="middle" fill="#6b7785">4</text>
+<text x="402.2" y="383.0" font-size="11" text-anchor="middle" fill="#6b7785">5</text>
+<text x="359.0" y="426.2" font-size="11" text-anchor="middle" fill="#6b7785">6</text>
+<text x="300.0" y="442.0" font-size="11" text-anchor="middle" fill="#6b7785">7</text>
+<text x="241.0" y="426.2" font-size="11" text-anchor="middle" fill="#6b7785">8</text>
+<text x="197.8" y="383.0" font-size="11" text-anchor="middle" fill="#6b7785">9</text>
+<text x="182.0" y="324.0" font-size="11" text-anchor="middle" fill="#6b7785">10</text>
+<text x="197.8" y="265.0" font-size="11" text-anchor="middle" fill="#6b7785">11</text>
+<text x="241.0" y="221.8" font-size="11" text-anchor="middle" fill="#6b7785">12</text>
+<polygon points="300.8,242.0 300.0,228.0 339.0,252.5 339.7,252.8 346.0,240.3 367.5,281.0 367.9,281.7 379.7,274.0 378.0,320.0 378.0,320.8 392.0,320.0 367.5,359.0 367.2,359.7 379.7,366.0 339.0,387.5 338.3,387.9 346.0,399.7 300.0,398.0 299.2,398.0 300.0,412.0 261.0,387.5 260.3,387.2 254.0,399.7 232.5,359.0 232.1,358.3 220.3,366.0 222.0,320.0 222.0,319.2 208.0,320.0 232.5,281.0 232.8,280.3 220.3,274.0 261.0,252.5 261.7,252.1 254.0,240.3 300.0,242.0" fill="#ffffff" stroke="#1f2731" stroke-width="1.5"/>
+<circle cx="300" cy="320" r="16" fill="#1f2731"/>
+<text x="300" y="360" font-size="11" text-anchor="middle" fill="#6b7785">shaft</text>
+<line x1="410" y1="292" x2="385.7" y2="327.5" stroke="#2f7bd6" stroke-width="5" stroke-linecap="round"/>
+<circle cx="410" cy="292" r="5" fill="#1f2731"/>
+<line x1="337.8" y1="179.0" x2="346.1" y2="148.1" stroke="#1f2731" stroke-width="3"/>
+<circle cx="346.1" cy="148.1" r="8" fill="#ffffff" stroke="#1f2731" stroke-width="2.5"/>
+<line x1="403.2" y1="216.8" x2="425.9" y2="194.1" stroke="#1f2731" stroke-width="3"/>
+<circle cx="425.9" cy="194.1" r="8" fill="#ffffff" stroke="#1f2731" stroke-width="2.5"/>
+<line x1="441.0" y1="282.2" x2="471.9" y2="273.9" stroke="#1f2731" stroke-width="3"/>
+<circle cx="471.9" cy="273.9" r="8" fill="#ffffff" stroke="#1f2731" stroke-width="2.5"/>
+<line x1="441.0" y1="357.8" x2="471.9" y2="366.1" stroke="#1f2731" stroke-width="3"/>
+<circle cx="471.9" cy="366.1" r="8" fill="#ffffff" stroke="#1f2731" stroke-width="2.5"/>
+<line x1="403.2" y1="423.2" x2="425.9" y2="445.9" stroke="#1f2731" stroke-width="3"/>
+<circle cx="425.9" cy="445.9" r="8" fill="#ffffff" stroke="#1f2731" stroke-width="2.5"/>
+<line x1="337.8" y1="461.0" x2="346.1" y2="491.9" stroke="#1f2731" stroke-width="3"/>
+<circle cx="346.1" cy="491.9" r="8" fill="#ffffff" stroke="#1f2731" stroke-width="2.5"/>
+<line x1="262.2" y1="461.0" x2="253.9" y2="491.9" stroke="#1f2731" stroke-width="3"/>
+<circle cx="253.9" cy="491.9" r="8" fill="#ffffff" stroke="#1f2731" stroke-width="2.5"/>
+<line x1="196.8" y1="423.2" x2="174.1" y2="445.9" stroke="#1f2731" stroke-width="3"/>
+<circle cx="174.1" cy="445.9" r="8" fill="#ffffff" stroke="#1f2731" stroke-width="2.5"/>
+<line x1="159.0" y1="357.8" x2="128.1" y2="366.1" stroke="#1f2731" stroke-width="3"/>
+<circle cx="128.1" cy="366.1" r="8" fill="#ffffff" stroke="#1f2731" stroke-width="2.5"/>
+<line x1="159.0" y1="282.2" x2="128.1" y2="273.9" stroke="#1f2731" stroke-width="3"/>
+<circle cx="128.1" cy="273.9" r="8" fill="#ffffff" stroke="#1f2731" stroke-width="2.5"/>
+<line x1="196.8" y1="216.8" x2="174.1" y2="194.1" stroke="#1f2731" stroke-width="3"/>
+<circle cx="174.1" cy="194.1" r="8" fill="#ffffff" stroke="#1f2731" stroke-width="2.5"/>
+<line x1="262.2" y1="179.0" x2="253.9" y2="148.1" stroke="#1f2731" stroke-width="3"/>
+<circle cx="253.9" cy="148.1" r="8" fill="#ffffff" stroke="#1f2731" stroke-width="2.5"/>
+<rect x="293" y="130" width="14" height="44" rx="3" fill="#2f7bd6"/>
+<path d="M300 130 l0 -6 l-10 -6 l20 -8 l-20 -8 l20 -8 l-10 -6 l0 -6" fill="none" stroke="#2f7bd6" stroke-width="2"/>
+<line x1="270" y1="80" x2="330" y2="80" stroke="#1f2731" stroke-width="3"/>
+<line x1="102.2" y1="269.5" x2="120.3" y2="337.1" stroke="#d9434e" stroke-width="10" stroke-linecap="round"/>
+<line x1="132.9" y1="333.7" x2="107.7" y2="340.5" stroke="#d9434e" stroke-width="5" stroke-linecap="round"/>
+<line x1="132.9" y1="333.7" x2="138.0" y2="353.0" stroke="#d9434e" stroke-width="5" stroke-linecap="round"/>
+<line x1="107.7" y1="340.5" x2="112.9" y2="359.8" stroke="#d9434e" stroke-width="5" stroke-linecap="round"/>
+<path d="M163.7 482.4 A212 212 0 0 0 389.6 512.1" fill="none" stroke="#d9434e" stroke-width="3" marker-end="url(#ah)"/>
+<circle cx="352" cy="110" r="13" fill="#1f2731"/><text x="352" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">1</text>
+<circle cx="78" cy="269" r="13" fill="#1f2731"/><text x="78" y="274" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">2</text>
+<circle cx="436" cy="278" r="13" fill="#1f2731"/><text x="436" y="283" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
+<circle cx="283" cy="531" r="13" fill="#1f2731"/><text x="283" y="536" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">4</text>
+<circle cx="603" cy="130" r="13" fill="#1f2731"/><text x="603" y="135" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">1</text>
+<text x="628" y="135" font-size="16" font-weight="700" fill="#1f2731">Spring latch, normally locked</text>
+<text x="628" y="158" font-size="13.5" fill="#6b7785">Drops into one of 12 indexing notches. A</text>
+<text x="628" y="177" font-size="13.5" fill="#6b7785">hand lifts it to release; on power loss it</text>
+<text x="628" y="196" font-size="13.5" fill="#6b7785">stays locked.</text>
+<circle cx="603" cy="230" r="13" fill="#1f2731"/><text x="603" y="235" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">2</text>
+<text x="628" y="235" font-size="16" font-weight="700" fill="#1f2731">Hand pushes a peg</text>
+<text x="628" y="258" font-size="13.5" fill="#6b7785">Pegs on the hub give a positive grip; no</text>
+<text x="628" y="277" font-size="13.5" fill="#6b7785">friction rim. Push, release, take the next</text>
+<text x="628" y="296" font-size="13.5" fill="#6b7785">peg.</text>
+<circle cx="603" cy="330" r="13" fill="#1f2731"/><text x="603" y="335" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
+<text x="628" y="335" font-size="16" font-weight="700" fill="#1f2731">Ratchet and pawl</text>
+<text x="628" y="358" font-size="13.5" fill="#6b7785">Lets the reel turn forward only, so it</text>
+<text x="628" y="377" font-size="13.5" fill="#6b7785">cannot roll back while the hand re-grips.</text>
+<circle cx="603" cy="430" r="13" fill="#1f2731"/><text x="603" y="435" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">4</text>
+<text x="628" y="435" font-size="16" font-weight="700" fill="#1f2731">Forward rotation</text>
+<text x="628" y="458" font-size="13.5" fill="#6b7785">One position per peg. Tube N is brought to</text>
+<text x="628" y="477" font-size="13.5" fill="#6b7785">the arms in (N - current) mod 12 steps.</text>
+<text x="32" y="580" font-size="12" fill="#6b7785">robotarm-lab · docs/design/reel-indexing.md</text>
+</svg>

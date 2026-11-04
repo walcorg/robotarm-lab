@@ -14,7 +14,8 @@ thousand tokens each and are only sent on request.
   "hands": [
     { "name": "left",  "grip": "open",    "holding": null,  "at_station": null },
     { "name": "right", "grip": "holding", "holding": "V01", "at_station": 4 }
-  ]
+  ],
+  "reel": { "positions": 12, "tube_at_work": 7, "latched": true }
 }
 ```
 
@@ -30,6 +31,10 @@ thousand tokens each and are only sent on request.
 | `hands[].grip` | `"open"` \| `"closed"` \| `"holding"` | `closed` with no object means a failed grasp |
 | `hands[].holding` | string \| null | Object id |
 | `hands[].at_station` | int \| null | null = home pose |
+| `reel` | object \| null | null when the workcell has no reel |
+| `reel.positions` | int | Number of tube positions (12) |
+| `reel.tube_at_work` | int | Tube currently facing the arms, 1-based |
+| `reel.latched` | bool | Spring latch seated in an indexing notch |
 
 Rules:
 - An object is either in exactly one station or held by exactly one hand.

@@ -75,6 +75,14 @@ back on one sliding carriage that runs along a rail above the reel.
 
 <img src="docs/images/arms-carriage-rail.png" alt="Two arms mounted back to back on a sliding carriage over the rail">
 
+### Reel indexing
+
+The reel has no motor: the arms turn it by pushing pegs on the hub, a ratchet keeps it from
+rolling back, and a spring latch locks it at each of the 12 positions.
+[Design decision](docs/design/reel-indexing.md).
+
+<img src="docs/images/reel-indexing-concept.svg" alt="Diagram: a hand pushes a peg on the reel hub; a spring latch locks the reel in one of 12 notches; a ratchet allows forward rotation only">
+
 ### Earlier iterations
 
 First 3D sketches, also created with **Autodesk Inventor**.
@@ -124,9 +132,11 @@ pytest -q
 claude mcp add robotarm -- robotarm-mcp --backend sim
 claude
 > Move the cup to the handover station, then pass it to the right hand and put it in outbound.
+> Then bring tube 7 to the arms.
 ```
 
-`--grip-fail-rate 0.3` makes the simulator drop grasps so you can see how Claude recovers.
+`--grip-fail-rate 0.3` makes the simulator drop grasps and `--latch-fail-rate 0.2` makes the
+reel latch miss, so you can see how Claude recovers.
 
 ## Repository layout
 
@@ -146,6 +156,7 @@ claude
 - [MCP tools](docs/mcp-tools.md): every tool, its arguments and result codes
 - [Scene schema](docs/scene-schema.md): the JSON Claude reads
 - [Safety](docs/safety.md): what each layer is allowed to do
+- [Reel indexing](docs/design/reel-indexing.md): why the arms turn and lock the reel
 - [Roadmap](docs/roadmap.md): phases and exit criteria
 
 ## License

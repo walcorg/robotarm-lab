@@ -26,3 +26,9 @@ the result, you share the modified design files.
 - Wrist camera mount with a fixed, calibrated pose
 - Non-backdrivable or braked wrist so a held object is not dropped on power loss
 - Mechanical stops beyond the firmware soft limits
+
+## Requirements for the reel
+
+See [docs/design/reel-indexing.md](../docs/design/reel-indexing.md): indexing plate with 12
+notches and a spring latch, 12 hub pegs, ratchet and pawl, latch-seated switch, tube-position
+sensor. No reel motor.
